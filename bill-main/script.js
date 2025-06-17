@@ -18,22 +18,34 @@ function formatDateInput(dateStr) {
 }
 
 function updateBillCalculations() {
-    // Get values
-    const units = parseFloat(document.getElementById('unitsConsumed').value) || 0;
+    // Get values from localStorage if available
+    const savedData = localStorage.getItem('deviceData');
+    let totalUnits = 0;
+    
+    if (savedData) {
+        const deviceData = JSON.parse(savedData);
+        totalUnits = deviceData.reduce((sum, device) => {
+            return sum + parseFloat(device.totalUnits.replace(/,/g, '')) || 0;
+        }, 0);
+    } else {
+        totalUnits = parseFloat(document.getElementById('unitsConsumed').value) || 0;
+    }
+
     const days = parseFloat(document.getElementById('days').value) || 1;
     const rate = parseFloat(document.getElementById('genRate').value) || 0;
-    const kwhPerDay = units / days;
+    const kwhPerDay = totalUnits / days;
     const kwhKwpDay = kwhPerDay / 328.09;
-    // Update calculated fields
+
+    // Update all relevant fields
+    document.getElementById('unitsConsumed').value = formatNumber(totalUnits);
     document.getElementById('kwhPerDay').value = formatNumber(kwhPerDay);
     document.getElementById('kwhKwpDay').value = formatNumber(kwhKwpDay, 2);
-    document.getElementById('genUnits').value = formatNumber(units);
-    document.getElementById('genAmount').value = formatNumber(units * rate);
-    document.getElementById('solarCharges').value = formatNumber(units * rate);
-    document.getElementById('totalCharges').value = formatNumber(units * rate);
-    document.getElementById('displayCurrentAmount').textContent = formatNumber(units * rate, 0);
-    // Update all other amount fields if needed
-    // (adjAmount, deemAmount, elecDuty, gstAmount can be set to 0 or left as is)
+    document.getElementById('genUnits').value = formatNumber(totalUnits);
+    document.getElementById('genAmount').value = formatNumber(totalUnits * rate);
+    document.getElementById('solarCharges').value = formatNumber(totalUnits * rate);
+    document.getElementById('totalCharges').value = formatNumber(totalUnits * rate);
+    document.getElementById('displayCurrentAmount').textContent = formatNumber(totalUnits * rate, 0);
+    document.getElementById('displayCurrentBillAmount').textContent = formatNumber(totalUnits * rate, 2);
 }
 
 function addBillInputListeners() {
@@ -44,6 +56,7 @@ function addBillInputListeners() {
             this.select();
         });
     });
+    
     // Date fields: update display format if needed
     document.getElementById('billDate').addEventListener('change', function() {
         this.title = formatDateInput(this.value);
@@ -62,6 +75,19 @@ function addBillInputListeners() {
 document.addEventListener('DOMContentLoaded', function() {
     addBillInputListeners();
     updateBillCalculations();
+    
+    // Listen for units updates from the meter reading page
+    window.addEventListener('unitsUpdated', function() {
+        updateBillCalculations();
+    });
+    
+    // Also check for updates when the page becomes visible
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            updateBillCalculations();
+        }
+    });
+    
     document.getElementById('generatePDFBtn').addEventListener('click', function() {
         generatePDF();
     });
