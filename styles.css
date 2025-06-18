@@ -607,18 +607,34 @@
             margin-top: 40px;
             padding-top: 20px;
             border-top: 1px solid #ddd;
+        }
+
+        .second-page-header {
+            margin-bottom: 30px;
+        }
+
+        .second-page-header h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .header-separator {
+            height: 2px;
+            background: #333;
+            margin: 0 auto;
+            width: 80%;
+        }
+
+        .second-page-sections {
             display: flex;
+            flex-direction: row;
             gap: 30px;
         }
 
         .meter-readings {
             flex: 2;
             min-width: 0; /* Prevents flex item from overflowing */
-        }
-
-        .meter-readings h2 {
-            font-size: 20px;
-            margin-bottom: 20px;
         }
 
         .meter-readings h3 {
@@ -745,6 +761,9 @@
                 margin-top: 0;
                 padding-top: 0;
                 border-top: none;
+            }
+
+            .second-page-sections {
                 display: block;
             }
 
@@ -771,4 +790,9 @@
         .meter-readings th,
         .meter-readings td {
             white-space: nowrap;
+        }
+
+        .highlight-total-row {
+            border-top: 2px solid #000 !important;
+            border-bottom: 2px solid #000 !important;
         }
