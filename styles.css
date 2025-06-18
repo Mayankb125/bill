@@ -430,22 +430,90 @@
         }
 
         @media print {
-            .form-section {
-                display: none;
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .container {
-                grid-template-columns: 1fr;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                max-width: none;
             }
 
             .bill-container {
+                margin: 0;
+                padding: 20px;
+                width: 210mm;
                 box-shadow: none;
-                padding: 0;
+                border-radius: 0;
             }
 
-            body {
-                background: white;
-                padding: 0;
+            /* Hide interactive elements */
+            #generatePDFBtn,
+            .add-button,
+            .delete-button,
+            input[type="button"],
+            button:not(.fixed-text) {
+                display: none !important;
+            }
+
+            /* Ensure proper page breaks */
+            .second-page-content {
+                page-break-before: always;
+                margin-top: 0;
+                padding-top: 20px;
+            }
+
+            /* Prevent unwanted breaks */
+            .meter-readings table,
+            .faq-section,
+            .bill-breakdown,
+            .footer {
+                page-break-inside: avoid;
+            }
+
+            /* Clean up table appearance */
+            .meter-readings table,
+            .bill-breakdown table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            .meter-readings th,
+            .meter-readings td,
+            .bill-breakdown th,
+            .bill-breakdown td {
+                border: 1px solid #000;
+                padding: 8px;
+            }
+
+            /* Ensure proper coloring */
+            .highlight-total-row,
+            .consumption-grid,
+            .right-header,
+            .bill-overview {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Clean up spacing */
+            .bill-header {
+                margin-bottom: 30px;
+            }
+
+            .footer {
+                margin-top: 30px;
+                border-top: 1px solid #000;
+            }
+
+            /* Ensure text is black and readable */
+            * {
+                color: black !important;
             }
         }
 
@@ -616,19 +684,15 @@
         .second-page-header h2 {
             font-size: 20px;
             margin-bottom: 15px;
-            text-align: center;
         }
 
         .header-separator {
-            height: 2px;
-            background: #333;
-            margin: 0 auto;
-            width: 80%;
+            border-bottom: 2px solid #000;
+            margin: 15px 0;
         }
 
         .second-page-sections {
             display: flex;
-            flex-direction: row;
             gap: 30px;
         }
 
@@ -793,6 +857,6 @@
         }
 
         .highlight-total-row {
-            border-top: 2px solid #000 !important;
-            border-bottom: 2px solid #000 !important;
+            background-color: #E0FFFF !important;
+            font-weight: bold;
         }

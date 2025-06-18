@@ -65,19 +65,83 @@ document.addEventListener('DOMContentLoaded', function() {
 function generatePDF() {
     const element = document.getElementById('bill');
     const btn = document.getElementById('generatePDFBtn');
-    // Hide the button during PDF generation
+
+    // Helper: Replace all inputs and textareas with static text for PDF
+    function replaceInputsWithText(root) {
+        const replaced = [];
+        root.querySelectorAll('input, textarea').forEach(input => {
+            const span = document.createElement('span');
+            span.className = 'fixed-text';
+            span.style.whiteSpace = input.tagName === 'TEXTAREA' ? 'pre-wrap' : 'pre';
+            span.textContent = input.type === 'date' ? formatDateInput(input.value) : input.value;
+            input.style.display = 'none';
+            input.parentNode.insertBefore(span, input);
+            replaced.push({input, span});
+        });
+        return replaced;
+    }
+
+    // Helper: Restore all replaced elements
+    function restoreInputs(replaced) {
+        replaced.forEach(({input, span}) => {
+            input.style.display = '';
+            span.parentNode?.removeChild(span);
+        });
+    }
+
+    // Hide the generate button
     btn.style.display = 'none';
-    // Small timeout to ensure button is hidden in render
+
+    // Small timeout to ensure elements are hidden
     setTimeout(() => {
+        // Replace all inputs with static text
+        const replaced = replaceInputsWithText(element);
+
+        // PDF options focused on clean output
         const opt = {
-            margin: [0.5, 0.5, 0.5, 0.5], // top, left, bottom, right (inches)
-            filename: 'solar-bill.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            margin: [15, 15, 15, 15], // 15mm margins
+            filename: `solar-bill-${document.getElementById('billMonth').textContent.trim()}.pdf`,
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                onclone: function(clonedDoc) {
+                    const clonedElement = clonedDoc.getElementById('bill');
+                    if (clonedElement) {
+                        // Set exact A4 dimensions
+                        clonedElement.style.width = '210mm';
+                        clonedElement.style.padding = '0';
+                        clonedElement.style.margin = '0';
+                        
+                        // Hide all buttons in the clone
+                        clonedDoc.querySelectorAll('button').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
+                    }
+                }
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait',
+                compress: true
+            },
+            pagebreak: { mode: ['avoid-all', 'css'] }
         };
-        html2pdf().set(opt).from(element).save().then(() => {
-            // Restore the button after PDF is generated
+
+        // Generate PDF
+        html2pdf().set(opt).from(element).save()
+        .then(() => {
+            // Restore the page to interactive state
+            restoreInputs(replaced);
+            btn.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('PDF generation failed:', error);
+            // Restore even on error
+            restoreInputs(replaced);
             btn.style.display = 'block';
         });
     }, 100);
